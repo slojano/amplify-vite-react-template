@@ -34,7 +34,7 @@ function App() {
         ))}
       </ul>
       <div>
-        🥳
+      🙎‍♀️
         <br />
         
         
