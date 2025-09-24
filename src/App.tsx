@@ -2,46 +2,196 @@ import { useEffect, useState } from "react";
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
+import * as React from 'react';
+import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 
-const client = generateClient<Schema>();
-  
-function deleteTodo(id: string) {
-  client.models.Todo.delete({ id })
-}
-function App() {
-  const { user, signOut } = useAuthenticator();
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
 
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
+//bottom nav imports
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import BottomNavigation from '@mui/material/BottomNavigation';
+import BottomNavigationAction from '@mui/material/BottomNavigationAction';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import Paper from '@mui/material/Paper';
+import List from '@mui/material/List';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import Avatar from '@mui/material/Avatar';
+import MapIcon from '@mui/icons-material/Map';
+import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
+import UploadIcon from '@mui/icons-material/Upload';
+import Form from "./form";
+
+
+
+import { UseAuthenticator } from "@aws-amplify/ui-react";
+import{
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  Pin,
+  InfoWindow,
+} from "@vis.gl/react-google-maps";
+
+//console.log("App loaded");
+
+ function MapView(){
+  const { user, route } = useAuthenticator((context) => [context.user, context.route]);
+  console.log("ath route: ", route);
+  console.log("User:", user);
+
+  const position = { lat: 39.8283, lng: -98.5795};
+
+  if(route !== 'authenticated'){
+    return <div>Loading or not signed in...</div>;
   }
 
-  return (
-    <main>
-          <h1>{user?.signInDetails?.loginId}'s todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li           
-          onClick={() => deleteTodo(todo.id)}
-          key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-      🙎‍♀️
-        <br />
-        
-        
-      </div>
-      <button onClick={signOut}>Sign out</button>
-    </main>
+
+  return(
+    <APIProvider apiKey="AIzaSyCWU-TAaHrKYGySM4hh3RRGpcKQhpOSihk">
+    <div style = {{height: "100vh"}}>
+    <Map 
+    defaultZoom = {5} 
+    defaultCenter={position} 
+    mapId = "93e9c6ace1e544e"
+    >
+      <AdvancedMarker position={position}>
+        <Pin
+        background={"purple"}
+        borderColor={"green"}
+        glyphColor={"blue"}
+        />
+      </AdvancedMarker>
+    </Map>
+    </div>
+    </APIProvider>
   );
 }
+
+
+ 
+const client = generateClient<Schema>();
+  
+
+function refreshMessages(): MessageExample[] {
+  const getRandomInt = (max: number) => Math.floor(Math.random() * Math.floor(max));
+
+  return Array.from(new Array(50)).map(
+    () => messageExamples[getRandomInt(messageExamples.length)],
+  );
+}
+
+ function App(){
+  const { signOut } = useAuthenticator();
+
+  const [value, setValue] = React.useState(0);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = React.useState(() => refreshMessages());
+
+  React.useEffect(() => {
+    (ref.current as HTMLDivElement).ownerDocument.body.scrollTop = 0;
+    setMessages(refreshMessages());
+  }, [value, setMessages]);
+
+  return (
+    <Box sx={{ pb: 7 }} ref={ref}>
+       <button id="logout" onClick={signOut}
+       style={{
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 1000,
+        padding: '8px 16px',
+        background: '#1976d2',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer'
+      }} >
+    Logout
+  </button>
+      <CssBaseline />
+      {value === 0 && <MapView />}
+      {value === 1 && <Form />}
+      {value === 2 && <div style={{ padding: 20 }}>Blank Archive Page</div>}
+      {value === 3 && (
+      <List>
+        {messages.map(({ primary, secondary, person }, index) => (
+          <ListItemButton key={index + person}>
+            <ListItemAvatar>
+              <Avatar alt="Profile Picture" src={person} />
+            </ListItemAvatar>
+            <ListItemText primary={primary} secondary={secondary} />
+          </ListItemButton>
+        ))}
+      </List>
+      )}
+      <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
+        <BottomNavigation
+          showLabels
+          value={value}
+          onChange={(event, newValue) => {
+            setValue(newValue);
+          }}
+        >
+          <BottomNavigationAction label="Map" icon={<MapIcon />} />
+          <BottomNavigationAction label="Upload" icon={<UploadIcon />} />
+          <BottomNavigationAction label="Info" icon={<InfoOutlineIcon />} />
+          <BottomNavigationAction label="Messages?" icon={<ArchiveIcon />} />
+        </BottomNavigation>
+      </Paper>
+    </Box>
+  );
+}
+interface MessageExample {
+  primary: string;
+  secondary: string;
+  person: string;
+}
+
+const messageExamples: readonly MessageExample[] = [
+  {
+    primary: 'Brunch this week?',
+    secondary: "I'll be in the neighbourhood this week. Let's grab a bite to eat",
+    person: '/static/images/avatar/5.jpg',
+  },
+  {
+    primary: 'Birthday Gift',
+    secondary: `Do you have a suggestion for a good present for John on his work
+      anniversary. I am really confused & would love your thoughts on it.`,
+    person: '/static/images/avatar/1.jpg',
+  },
+  {
+    primary: 'Recipe to try',
+    secondary: 'I am try out this new BBQ recipe, I think this might be amazing',
+    person: '/static/images/avatar/2.jpg',
+  },
+  {
+    primary: 'Yes!',
+    secondary: 'I have the tickets to the ReactConf for this year.',
+    person: '/static/images/avatar/3.jpg',
+  },
+  {
+    primary: "Doctor's Appointment",
+    secondary: 'My appointment for the doctor was rescheduled for next Saturday.',
+    person: '/static/images/avatar/4.jpg',
+  },
+  {
+    primary: 'Discussion',
+    secondary: `Menus that are generated by the bottom app bar (such as a bottom
+      navigation drawer or overflow menu) open as bottom sheets at a higher elevation
+      than the bar.`,
+    person: '/static/images/avatar/5.jpg',
+  },
+  {
+    primary: 'Summer BBQ',
+    secondary: `Who wants to have a cookout this weekend? I just got some furniture
+      for my backyard and would love to fire up the grill.`,
+    person: '/static/images/avatar/1.jpg',
+  },
+];
+
 
 export default App;
