@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+//import { useEffect, useState } from "react";
 import { useAuthenticator } from '@aws-amplify/ui-react';
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+//import type { Schema } from "../amplify/data/resource";
+//import { generateClient } from "aws-amplify/data";
 import * as React from 'react';
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+//import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 
 
 
@@ -26,13 +26,13 @@ import Form from "./form";
 
 
 
-import { UseAuthenticator } from "@aws-amplify/ui-react";
+//import { UseAuthenticator } from "@aws-amplify/ui-react";
 import{
   APIProvider,
   Map,
   AdvancedMarker,
   Pin,
-  InfoWindow,
+  //InfoWindow,
 } from "@vis.gl/react-google-maps";
 
 //console.log("App loaded");
@@ -72,7 +72,7 @@ import{
 
 
  
-const client = generateClient<Schema>();
+//const client = generateClient<Schema>();
   
 
 function refreshMessages(): MessageExample[] {
@@ -132,7 +132,7 @@ function refreshMessages(): MessageExample[] {
         <BottomNavigation
           showLabels
           value={value}
-          onChange={(event, newValue) => {
+          onChange={(_, newValue) => {
             setValue(newValue);
           }}
         >
