@@ -1,6 +1,6 @@
 import * as React from "react";
 import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../amplify/data/resource";
+import type { Schema } from "../../amplify/data/resource";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 
 const client = generateClient<Schema>();
@@ -15,7 +15,7 @@ export default function Form() {
     if (!address) return;
 
     try {
-      // Geocode the address
+      // 1️Geocode the address
       const geoRes = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
           address
@@ -30,7 +30,7 @@ export default function Form() {
 
       const { lat, lng } = data.results[0].geometry.location;
 
-      // Save the pin in Amplify Data
+      // 2️Save the pin in Amplify Data
       const newPin = await client.models.Pin.create({
         location: address,
         lat,

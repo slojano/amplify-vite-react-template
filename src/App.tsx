@@ -1,7 +1,7 @@
 //import { useEffect, useState } from "react";
 import { useAuthenticator } from '@aws-amplify/ui-react';
-//import type { Schema } from "../amplify/data/resource";
-//import { generateClient } from "aws-amplify/data";
+import type { Schema } from "../amplify/data/resource";
+import { generateClient } from "aws-amplify/data";
 import * as React from 'react';
 //import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 
@@ -34,9 +34,11 @@ import{
   Pin,
   //InfoWindow,
 } from "@vis.gl/react-google-maps";
-
+const client = generateClient<Schema>();
 //console.log("App loaded");
 
+
+/*
  function MapView(){
   const { user, route } = useAuthenticator((context) => [context.user, context.route]);
   console.log("ath route: ", route);
@@ -69,31 +71,58 @@ import{
     </APIProvider>
   );
 }
+*/
 
+function MapView() {
+  const { user } = useAuthenticator();
+  const [pins, setPins] = React.useState<Schema["Pin"]["type"][]>([]);
+  const client = generateClient<Schema>();
+  const center = { lat: 38.8283, lng: -98.5795 };
 
- 
-//const client = generateClient<Schema>();
-  
+  React.useEffect(() => {
+    const loadPins = async () => {
+      try {
+        const res = await client.models.Pin.list({
+          filter: { userId: { eq: user.userId } },
+        });
+        setPins(res.data);
+      } catch (err) {
+        console.error("Error loading pins:", err);
+      }
+    };
+    loadPins();
+  }, [user.userId]);
 
-function refreshMessages(): MessageExample[] {
-  const getRandomInt = (max: number) => Math.floor(Math.random() * Math.floor(max));
-
-  return Array.from(new Array(50)).map(
-    () => messageExamples[getRandomInt(messageExamples.length)],
+  return (
+    <APIProvider apiKey="AIzaSyCWU-TAaHrKYGySM4hh3RRGpcKQhpOSihk">
+      <div style={{ height: "100vh" }}>
+        <Map defaultZoom={5} defaultCenter={center} mapId="93e9c6ace1e544e">
+          {pins.map((pin) => (
+            <AdvancedMarker key={pin.id} position={{ lat: pin.lat!, lng: pin.lng! }}>
+              <Pin background="purple" borderColor="green" glyphColor="white" />
+            </AdvancedMarker>
+          ))}
+        </Map>
+      </div>
+    </APIProvider>
   );
 }
+
+
+  
+
+
 
  function App(){
   const { signOut } = useAuthenticator();
 
   const [value, setValue] = React.useState(0);
   const ref = React.useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = React.useState(() => refreshMessages());
-
+  
   React.useEffect(() => {
     (ref.current as HTMLDivElement).ownerDocument.body.scrollTop = 0;
-    setMessages(refreshMessages());
-  }, [value, setMessages]);
+    
+  }, [value]);
 
   return (
     <Box sx={{ pb: 7 }} ref={ref}>
@@ -116,18 +145,7 @@ function refreshMessages(): MessageExample[] {
       {value === 0 && <MapView />}
       {value === 1 && <Form />}
       {value === 2 && <div style={{ padding: 20 }}>Blank Archive Page</div>}
-      {value === 3 && (
-      <List>
-        {messages.map(({ primary, secondary, person }, index) => (
-          <ListItemButton key={index + person}>
-            <ListItemAvatar>
-              <Avatar alt="Profile Picture" src={person} />
-            </ListItemAvatar>
-            <ListItemText primary={primary} secondary={secondary} />
-          </ListItemButton>
-        ))}
-      </List>
-      )}
+      {value === 3 && <div style={{ padding: 20 }}>Blank Archive Page</div>}
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation
           showLabels
@@ -139,59 +157,12 @@ function refreshMessages(): MessageExample[] {
           <BottomNavigationAction label="Map" icon={<MapIcon />} />
           <BottomNavigationAction label="Upload" icon={<UploadIcon />} />
           <BottomNavigationAction label="Info" icon={<InfoOutlineIcon />} />
-          <BottomNavigationAction label="Messages?" icon={<ArchiveIcon />} />
+          <BottomNavigationAction label="Pin Archive" icon={<ArchiveIcon />} />
         </BottomNavigation>
       </Paper>
     </Box>
   );
 }
-interface MessageExample {
-  primary: string;
-  secondary: string;
-  person: string;
-}
-
-const messageExamples: readonly MessageExample[] = [
-  {
-    primary: 'Brunch this week?',
-    secondary: "I'll be in the neighbourhood this week. Let's grab a bite to eat",
-    person: '/static/images/avatar/5.jpg',
-  },
-  {
-    primary: 'Birthday Gift',
-    secondary: `Do you have a suggestion for a good present for John on his work
-      anniversary. I am really confused & would love your thoughts on it.`,
-    person: '/static/images/avatar/1.jpg',
-  },
-  {
-    primary: 'Recipe to try',
-    secondary: 'I am try out this new BBQ recipe, I think this might be amazing',
-    person: '/static/images/avatar/2.jpg',
-  },
-  {
-    primary: 'Yes!',
-    secondary: 'I have the tickets to the ReactConf for this year.',
-    person: '/static/images/avatar/3.jpg',
-  },
-  {
-    primary: "Doctor's Appointment",
-    secondary: 'My appointment for the doctor was rescheduled for next Saturday.',
-    person: '/static/images/avatar/4.jpg',
-  },
-  {
-    primary: 'Discussion',
-    secondary: `Menus that are generated by the bottom app bar (such as a bottom
-      navigation drawer or overflow menu) open as bottom sheets at a higher elevation
-      than the bar.`,
-    person: '/static/images/avatar/5.jpg',
-  },
-  {
-    primary: 'Summer BBQ',
-    secondary: `Who wants to have a cookout this weekend? I just got some furniture
-      for my backyard and would love to fire up the grill.`,
-    person: '/static/images/avatar/1.jpg',
-  },
-];
 
 
 export default App;
