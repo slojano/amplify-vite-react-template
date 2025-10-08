@@ -14,11 +14,11 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import Paper from '@mui/material/Paper';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
+//import List from '@mui/material/List';
+//import ListItemButton from '@mui/material/ListItemButton';
+//import ListItemAvatar from '@mui/material/ListItemAvatar';
+//import ListItemText from '@mui/material/ListItemText';
+//import Avatar from '@mui/material/Avatar';
 import MapIcon from '@mui/icons-material/Map';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import UploadIcon from '@mui/icons-material/Upload';
@@ -34,7 +34,7 @@ import{
   Pin,
   //InfoWindow,
 } from "@vis.gl/react-google-maps";
-const client = generateClient<Schema>();
+
 //console.log("App loaded");
 
 
