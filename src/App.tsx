@@ -32,7 +32,7 @@ import{
   Map,
   AdvancedMarker,
   Pin,
-  InfoWindow,
+  //InfoWindow,
 } from "@vis.gl/react-google-maps";
 
 //console.log("App loaded");

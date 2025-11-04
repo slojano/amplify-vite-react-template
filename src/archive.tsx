@@ -1,7 +1,7 @@
 import * as React from "react";
 import { generateClient } from "aws-amplify/data";
 import { useAuthenticator } from "@aws-amplify/ui-react";
-import { Button, TextField, Card, CardContent, Typography } from "@mui/material";
+import { Button, Card, CardContent, Typography } from "@mui/material";
 import type { Schema } from "../amplify/data/resource";
 import AutocompleteAddressInput from "./AutocompleteAddressInput";
 
