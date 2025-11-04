@@ -5,7 +5,7 @@ import { generateClient } from "aws-amplify/data";
 import * as React from 'react';
 //import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 
-
+import FileUpload from "./fileUp";
 
 //bottom nav imports
 import Box from '@mui/material/Box';
@@ -230,7 +230,7 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
           />}
       {value === 1 && <Form />}
       {value === 2 && <ArchivePage />}
-      {value === 3 && <div style={{ padding: 20 }}>Blank Archive Page</div>}
+      {value === 3 && <FileUpload />}
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation
           showLabels
