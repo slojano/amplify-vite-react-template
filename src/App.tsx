@@ -26,6 +26,9 @@ import Form from "./form";
 import ArchivePage from "./archive";
 
 
+
+
+
 //import { UseAuthenticator } from "@aws-amplify/ui-react";
 import{
   APIProvider,
@@ -117,6 +120,33 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
   const [pins, setPins] = React.useState<Schema["Pin"]["type"][]>([]);
   const client = generateClient<Schema>();
 
+
+  //ask for location
+  /*
+  const [initialCenter, setInitialCenter] = React.useState<google.maps.LatLngLiteral | null>(null);
+
+React.useEffect(() => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setInitialCenter({ 
+          lat: position.coords.latitude, 
+          lng: position.coords.longitude 
+        });
+      },
+      () => {
+        // Fallback if denied
+        setInitialCenter(savedCenter);
+      }
+    );
+  } else {
+    setInitialCenter(savedCenter);
+  }
+}, []);
+*/
+  
+  
+
   React.useEffect(() => {
     const subCreate = client.models.Pin.onCreate().subscribe({
       next: (pin) => {
@@ -161,9 +191,28 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     };
   }, [user.userId]);
 
+  // search location
+  const [searchBox, setSearchBox] = React.useState<google.maps.places.SearchBox>();
+  React.useEffect(() => {
+    const input = document.getElementById("pac-input") as HTMLInputElement;
+    if (input && !searchBox) {
+      const sb = new google.maps.places.SearchBox(input);
+      sb.addListener("places_changed", () => {
+        const places = sb.getPlaces();
+        if (places && places.length > 0) {
+          const loc = places[0].geometry?.location;
+          if (loc) onMapMove({ lat: loc.lat(), lng: loc.lng() }, 12);
+        }
+      });
+      setSearchBox(sb);
+    }
+  }, [searchBox]);
+
   return (
     <div style={{ height: "100vh" }}>
+      
       <Map
+        
         defaultZoom={savedZoom}
         defaultCenter={savedCenter}
         mapId="93e9c6ace1e544e"
@@ -177,6 +226,7 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
           </AdvancedMarker>
         ))}
       </Map>
+      
     </div>
   );
 }
@@ -189,9 +239,37 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
 
   const [value, setValue] = React.useState(0);
   const ref = React.useRef<HTMLDivElement>(null);
+
   //map values
   const [mapCenter, setMapCenter] = React.useState({ lat: 38.8283, lng: -98.5795 });
   const [mapZoom, setMapZoom] = React.useState(5);
+
+
+  const [geoReady, setGeoReady] = React.useState(false);
+  //grab location
+  React.useEffect(() => {
+    (ref.current as HTMLDivElement).ownerDocument.body.scrollTop = 0;
+  
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setMapZoom(12); // zoom to user location
+          setGeoReady(true); // geolocation succeeded
+        },
+        (err) => {
+          console.warn("Geolocation failed or denied", err);
+          setGeoReady(true); 
+        }
+      );
+    } else { // geolocation not supported
+      setGeoReady(true);
+    }
+  }, []);
+  
 
   React.useEffect(() => {
     (ref.current as HTMLDivElement).ownerDocument.body.scrollTop = 0;
@@ -220,7 +298,7 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     Logout
   </button>
       <CssBaseline />
-      {value === 0 && <MapView
+      {value === 0 && geoReady && <MapView
             savedCenter={mapCenter}
             savedZoom={mapZoom}
             onMapMove={(center, zoom) => {
