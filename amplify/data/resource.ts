@@ -36,7 +36,9 @@ const schema = a.schema({
     })
     .authorization(allow => [
       allow.owner(), // owner can CRUD
-      allow.guest().to(["read"]), // anyone can read
+      //allow.guest().to(["read"]), // anyone can read
+      //allow.publicApiKey()
+      allow.publicApiKey().to(["read"]),
     ]),
 });
 

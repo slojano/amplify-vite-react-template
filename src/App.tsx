@@ -1,113 +1,50 @@
-//import { useEffect, useState } from "react";
+
+
+import { Amplify } from 'aws-amplify';
+import outputs from '../amplify_outputs.json';
+
+Amplify.configure(outputs);
+
+
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from "../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
 import * as React from 'react';
-//import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 
-import FileUpload from "./fileUp";
 
-//bottom nav imports
+
+
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import Paper from '@mui/material/Paper';
-//import List from '@mui/material/List';
-//import ListItemButton from '@mui/material/ListItemButton';
-//import ListItemAvatar from '@mui/material/ListItemAvatar';
-//import ListItemText from '@mui/material/ListItemText';
-//import Avatar from '@mui/material/Avatar';
+
 import MapIcon from '@mui/icons-material/Map';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import UploadIcon from '@mui/icons-material/Upload';
 import Form from "./form";
 import ArchivePage from "./archive";
+import { getUrl } from "aws-amplify/storage";
+
+
+type PinType = Schema["Pin"]["type"];
 
 
 
 
-
-//import { UseAuthenticator } from "@aws-amplify/ui-react";
 import{
   APIProvider,
   Map,
   AdvancedMarker,
   Pin,
-  //InfoWindow,
+  InfoWindow,
 } from "@vis.gl/react-google-maps";
 
-//console.log("App loaded");
 
 
-/*
-function MapView() {
-  const { user } = useAuthenticator();
-  const [pins, setPins] = React.useState<Schema["Pin"]["type"][]>([]);
-  const client = generateClient<Schema>();
-  const center = { lat: 38.8283, lng: -98.5795 };
 
-  React.useEffect(() => {
-    const subCreate = client.models.Pin.onCreate().subscribe({
-      next: (pin) => {
-        //const pin = event;
-        if (pin.userId === user.userId) {
-          setPins((prev) => [...prev, pin]);
-        }
-      },
-    });
-  
-    const subUpdate = client.models.Pin.onUpdate().subscribe({
-      next: (pin) => {
-        //const pin = event;
-        if (pin.userId === user.userId) {
-          setPins((prev) =>
-            prev.map((p) => (p.id === pin.id ? { ...p, ...pin } : p))
-          );
-        }
-      },
-    });
-  
-    const subDelete = client.models.Pin.onDelete().subscribe({
-      next: (pin) => {
-        //const pin = event;
-        if (pin.userId === user.userId) {
-          setPins((prev) => prev.filter((p) => p.id !== pin.id));
-        }
-      },
-    });
-  
-    // Initial load
-    const loadPins = async () => {
-      const res = await client.models.Pin.list( { authMode: "apiKey" }); // 👈 public read
-      setPins(res.data);
-    };
-    loadPins();
-  
-    return () => {
-      subCreate.unsubscribe();
-      subUpdate.unsubscribe();
-      subDelete.unsubscribe();
-    };
-  }, [user.userId]);
-  
-
-  return (
-    <APIProvider apiKey="AIzaSyCWU-TAaHrKYGySM4hh3RRGpcKQhpOSihk">
-      <div style={{ height: "100vh" }}>
-        <Map defaultZoom={5} defaultCenter={center} mapId="93e9c6ace1e544e">
-          {pins.map((pin) => (
-            <AdvancedMarker key={pin.id} position={{ lat: pin.lat!, lng: pin.lng! }}>
-              <Pin background="purple" borderColor="green" glyphColor="white" />
-            </AdvancedMarker>
-          ))}
-        </Map>
-      </div>
-    </APIProvider>
-  );
-}
-*/
 
 type MapViewProps = {
   savedCenter: google.maps.LatLngLiteral;
@@ -121,66 +58,73 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
   const client = generateClient<Schema>();
 
 
-  //ask for location
-  /*
-  const [initialCenter, setInitialCenter] = React.useState<google.maps.LatLngLiteral | null>(null);
 
-React.useEffect(() => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setInitialCenter({ 
-          lat: position.coords.latitude, 
-          lng: position.coords.longitude 
-        });
-      },
-      () => {
-        // Fallback if denied
-        setInitialCenter(savedCenter);
-      }
-    );
-  } else {
-    setInitialCenter(savedCenter);
-  }
-}, []);
-*/
   
   
 
   React.useEffect(() => {
+    
     const subCreate = client.models.Pin.onCreate().subscribe({
       next: (pin) => {
+        
         if (pin.userId === user.userId) {
           setPins((prev) => [...prev, pin]);
         }
+          
       },
     });
-
+    
+    
+    
+    
     const subUpdate = client.models.Pin.onUpdate().subscribe({
       next: (pin) => {
+        
         if (pin.userId === user.userId) {
           setPins((prev) =>
             prev.map((p) => (p.id === pin.id ? { ...p, ...pin } : p))
           );
         }
+        
+      
+
       },
     });
+    
+    
+    
+
 
     const subDelete = client.models.Pin.onDelete().subscribe({
       next: (pin) => {
+      
         if (pin.userId === user.userId) {
           setPins((prev) => prev.filter((p) => p.id !== pin.id));
         }
+        
+
       },
     });
 
     const loadPins = async () => {
+
+      
       const res = await client.models.Pin.list({ authMode: "apiKey" });
 
       console.log("All pins (public read):", res.data);
-      res.data.forEach(pin => console.log(pin.id, pin.userId, pin.owner));
-      
-      setPins(res.data);
+
+      //res.data.forEach(pin => console.log(pin.id, pin.userId, pin.owner));
+      const pinsWithUrls= await Promise.all(
+        res.data.map (async (pin) =>{
+          if(pin.upload){
+            const url = await getUrl({path:pin.upload});
+            return{...pin, imageUrl: url.url.toString()};
+          }
+          return pin;
+        })
+      )
+      //setPins(res.data);
+      setPins(pinsWithUrls)
     };
     loadPins();
 
@@ -190,6 +134,54 @@ React.useEffect(() => {
       subDelete.unsubscribe();
     };
   }, [user.userId]);
+
+  function PinMarker({ pin }: { pin: PinType & { imageUrl?: string } }) {
+    const [open, setOpen] = React.useState(false);
+  
+    return (
+      <>
+        <AdvancedMarker
+          position={{ lat: pin.lat!, lng: pin.lng! }}
+          onClick={() => setOpen(true)}
+        >
+          {pin.imageUrl ? (
+            <img
+              src={pin.imageUrl}
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "2px solid white",
+                boxShadow: "0 0 4px rgba(0,0,0,0.5)",
+              }}
+            />
+          ) : (
+            <Pin background="purple" borderColor="green" glyphColor="white" />
+          )}
+        </AdvancedMarker>
+  
+        {open && (
+          <InfoWindow
+            position={{ lat: pin.lat!, lng: pin.lng! }}
+            onCloseClick={() => setOpen(false)}
+          >
+            <div style={{ maxWidth: "200px" }}>
+              {pin.imageUrl && (
+                <img
+                  src={pin.imageUrl}
+                  style={{ width: "100%", borderRadius: "6px" }}
+                />
+              )}
+              <p>{pin.location}</p>
+            </div>
+          </InfoWindow>
+        )}
+      </>
+    );
+  }
+  
+  
 
   // search location
   const [searchBox, setSearchBox] = React.useState<google.maps.places.SearchBox>();
@@ -220,17 +212,19 @@ React.useEffect(() => {
           onMapMove(ev.detail.center, ev.detail.zoom);
         }}
       >
-        {pins.map((pin) => (
-          <AdvancedMarker key={pin.id} position={{ lat: pin.lat!, lng: pin.lng! }}>
-            <Pin background="purple" borderColor="green" glyphColor="white" />
-          </AdvancedMarker>
-        ))}
+      
+      {pins.map((pin) => (
+        <PinMarker key={pin.id} pin={pin} />
+      ))}
+
       </Map>
       
     </div>
   );
 }
+/*
 
+*/
 
 
 
@@ -298,7 +292,7 @@ React.useEffect(() => {
     Logout
   </button>
       <CssBaseline />
-      {value === 0 && geoReady && <MapView
+      {value === 0   && geoReady  && <MapView
             savedCenter={mapCenter}
             savedZoom={mapZoom}
             onMapMove={(center, zoom) => {
@@ -308,7 +302,9 @@ React.useEffect(() => {
           />}
       {value === 1 && <Form />}
       {value === 2 && <ArchivePage />}
-      {value === 3 && <FileUpload />}
+      {value === 3 && <p>blank </p>}
+      
+
       <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
         <BottomNavigation
           showLabels

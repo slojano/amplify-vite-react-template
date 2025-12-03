@@ -1,5 +1,9 @@
 import { defineStorage } from '@aws-amplify/backend';
 
+
+
+
+/*
 export const storage = defineStorage({
   name: 'pinImgs',
   access: (allow) => ({
@@ -8,5 +12,19 @@ export const storage = defineStorage({
     allow.guest.to(['read']),                      // everyone else can view
     ]
 
+  })
+  
+
+});console.log("Storage resource:", storage);
+
+*/
+
+export const storage = defineStorage({
+  name: 'pinImgs',
+  access: (allow) => ({
+    'public/*': [
+      allow.authenticated.to(['read', 'write']), //logged in
+      allow.guest.to(['read'])  //everyone can view
+    ]
   })
 });

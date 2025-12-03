@@ -4,10 +4,13 @@ import type { Schema } from "../amplify/data/resource";
 import { useAuthenticator } from "@aws-amplify/ui-react";
 import AutocompleteAddressInput from "./AutocompleteAddressInput";
 import { Card, CardContent, Typography, Button } from "@mui/material";
+import FileUpload from "./fileUp";
 
 const client = generateClient<Schema>();
 
 export default function Form() {
+  const [imageKey, setImageKey] = React.useState<string | null>(null);
+
   const { user } = useAuthenticator();
   const [address, setAddress] = React.useState("");
 
@@ -35,12 +38,15 @@ export default function Form() {
         lat,
         lng,
         userId: user.userId,
+        //description: string,
+        upload: imageKey,
       },
       {authMode: "userPool"}
     );
 
       alert("Pin created!");
       setAddress("");
+      setImageKey(null)
     } catch (err) {
       console.error("Error creating pin:", err);
     }
@@ -65,6 +71,11 @@ export default function Form() {
                 onChange={setAddress}
                 placeholder="123 Main St, New York, NY"
               />
+            </div>
+
+            <div style={{ position: "relative", zIndex: 1000 }}>
+            <FileUpload onUploaded={(key) => setImageKey(key)} />
+
             </div>
 
             <Button

@@ -26,7 +26,7 @@ export default function ArchivePage() {
 
         const res = await client.models.Pin.list({
           filter: { userId: { eq: user.userId } }, //  use userId, not owner
-          authMode: "apiKey"
+          authMode: "userPool"
         });
         console.log("Fetched pins:", res.data);
         setPins(res.data);
