@@ -208,6 +208,9 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
         defaultZoom={savedZoom}
         defaultCenter={savedCenter}
         mapId="93e9c6ace1e544e"
+        gestureHandling="greedy"
+      disableDefaultUI={true}
+        mapTypeControl={false}
         onCameraChanged={(ev) => {
           onMapMove(ev.detail.center, ev.detail.zoom);
         }}
@@ -278,10 +281,10 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     <Box sx={{ pb: 7 }} ref={ref}>
        <button id="logout" onClick={signOut}
        style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 10,
         right: 10,
-        zIndex: 1000,
+        zIndex: 2000,
         padding: '8px 16px',
         background: '#1976d2',
         color: 'white',
