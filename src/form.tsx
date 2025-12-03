@@ -71,8 +71,11 @@ export default function Form() {
                 onChange={setAddress}
                 placeholder="123 Main St, New York, NY"
               />
-            </div>
 
+            </div>
+            <div style={{ position: "relative", zIndex: 1000 }}>
+             
+            </div>
             <div style={{ position: "relative", zIndex: 1000 }}>
             <FileUpload onUploaded={(key) => setImageKey(key)} />
 
