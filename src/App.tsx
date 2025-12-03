@@ -199,16 +199,22 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
       setSearchBox(sb);
     }
   }, [searchBox]);
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   return (
-    <div style={{ height: "100vh" }}>
+    <div style={{
+       height: "100vh" ,
+       transform: "translateZ(0)",   // <-- GPU acceleration
+      willChange: "transform",       // <-- hints browser to optimize
+       }}>
+      
       
       <Map
         
         defaultZoom={savedZoom}
         defaultCenter={savedCenter}
         mapId="93e9c6ace1e544e"
-        gestureHandling="greedy"
+        gestureHandling={isMobile ? "greedy" : "auto"}
       disableDefaultUI={true}
         mapTypeControl={false}
         onCameraChanged={(ev) => {
