@@ -67,24 +67,23 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     const subCreate = client.models.Pin.onCreate().subscribe({
       next: (pin) => {
         
-        if (pin.userId === user.userId) {
+        //if (pin.userId === user.userId) {
           setPins((prev) => [...prev, pin]);
-        }
+        //}
           
       },
     });
-    
-    
+  
     
     
     const subUpdate = client.models.Pin.onUpdate().subscribe({
       next: (pin) => {
         
-        if (pin.userId === user.userId) {
+        //if (pin.userId === user.userId) {
           setPins((prev) =>
             prev.map((p) => (p.id === pin.id ? { ...p, ...pin } : p))
           );
-        }
+        //}
         
       
 
@@ -92,15 +91,13 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     });
     
     
-    
-
 
     const subDelete = client.models.Pin.onDelete().subscribe({
       next: (pin) => {
       
-        if (pin.userId === user.userId) {
+        //if (pin.userId === user.userId) {
           setPins((prev) => prev.filter((p) => p.id !== pin.id));
-        }
+        //}
         
 
       },
@@ -109,7 +106,7 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
     const loadPins = async () => {
 
       
-      const res = await client.models.Pin.list({ authMode: "apiKey" });
+      const res = await client.models.Pin.list();//({ authMode: "apiKey" });
 
       console.log("All pins (public read):", res.data);
 
@@ -199,13 +196,15 @@ function MapView({ savedCenter, savedZoom, onMapMove }: MapViewProps) {
       setSearchBox(sb);
     }
   }, [searchBox]);
+
+
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
   return (
     <div style={{
        height: "100vh" ,
-       transform: "translateZ(0)",   // <-- GPU acceleration
-      willChange: "transform",       // <-- hints browser to optimize
+       transform: "translateZ(0)",   
+      willChange: "transform",       
        }}>
       
       

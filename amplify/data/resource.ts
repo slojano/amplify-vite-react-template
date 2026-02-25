@@ -35,10 +35,9 @@ const schema = a.schema({
       user: a.belongsTo("User", "userId"),
     })
     .authorization(allow => [
-      allow.owner(), // owner can CRUD
-      //allow.guest().to(["read"]), // anyone can read
-      //allow.publicApiKey()
-      allow.publicApiKey().to(["read"]),
+      allow.authenticated().to(['read']),
+      allow.owner().to(['create', 'update', 'delete']), // owner can CRUD
+      //allow.publicApiKey().to(["read"]),
     ]),
 });
 
@@ -49,9 +48,9 @@ export const data = defineData({
   authorizationModes: {
     defaultAuthorizationMode: "userPool", // logged-in users (create/update/delete)
     
-    apiKeyAuthorizationMode: {
-      expiresInDays: 30, // or 7, 60, etc. — sets how long the key stays valid
-    },
+   // apiKeyAuthorizationMode: {
+    //  expiresInDays: 30, // sets how long the key stays valid
+    //},
     
   },
 });
